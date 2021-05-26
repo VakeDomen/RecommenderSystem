@@ -120,8 +120,12 @@ Movie: White Chicks, score: 1.1899581424297319
 """
 
 
+import random
 import pandas as pd
+from tqdm import tqdm
 from datetime import datetime
+
+
 
 class UserItemData:
     def __init__(self, path, from_date="1.1.1900", to_date="31.12.2025", min_ratings=0):
@@ -173,6 +177,27 @@ class MovieData:
         # return first element (title)
         return titles.iloc[0]
 
+class RandomPredictor:
+    def __init__(self, min_rating, max_rating):
+        self.min_rating = min_rating
+        self.max_rating = max_rating
+
+    def fit(self, user_item_data):
+        self.data = user_item_data.data
+        
+
+    def predict(self, user_id):
+        # from DataFrame column of movie ids to array
+        modvieIds = self.data['movieID'].to_numpy()
+        # init dict object
+        movieDict = {}
+        # loop through movie ids
+        for id in tqdm(modvieIds):
+            # generate random number for each id
+            movieDict[id] = random.randint(self.min_rating, self.max_rating)
+        return movieDict
+
+
 def readRatings():
     uim = UserItemData('data/user_ratedmovies.dat')
     print(uim.nratings())
@@ -183,8 +208,142 @@ def readMovies():
     md = MovieData('data/movies.dat')
     print(md.get_title(65091))
 
+def randomPredictor():
+    md = MovieData('data/movies.dat')
+    uim = UserItemData('data/user_ratedmovies.dat') 
+    rp = RandomPredictor(1, 5) 
+    rp.fit(uim) 
+    pred = rp.predict(78) 
+    print(type(pred)) 
+    items = [1, 3, 20, 50, 100] 
+    for item in items: 
+        print("Movie: {}, score: {}".format(md.get_title(item), pred[item]))
+
+class Recommender:
+    def __init__(self, predictor):
+        self.predictor = predictor
+
+
+    def fit(self, user_data):
+        self.predictor.fit(user_data)
+        
+    def recommend(self, userID, n = 10, rec_seen = True):
+        # get ratings of movies
+        predictions = self.predictor.predict(userID)
+        # if no predictions, return
+        if len(predictions) == 0:
+            return
+
+        predictions = dict(sorted(predictions.items(), key=lambda item: item[1], reverse=True))
+
+        invalid_predictions = None
+        # if user rated (watched) the movie
+        if rec_seen:
+            # find only rated movied
+            invalid_predictions = self.predictor.data.loc[self.predictor.data['userID'] == userID]['movieID'].to_numpy()
+            # loop through all predictions and find valid ones
+            for key in invalid_predictions:
+                predictions[key] = 0
+
+
+        # sort predictions by rating
+        # init ouput array
+        output = []
+
+        predictions = dict(sorted(predictions.items(), key=lambda item: item[1], reverse=True))
+        for key in predictions:
+            # if output is full, stop finding good movies
+            if len(output) == n:
+                break
+            output.append((key, predictions[key]))
+        return output
+
+def recommendation():
+    md = MovieData('data/movies.dat') 
+    uim = UserItemData('data/user_ratedmovies.dat') 
+    rp = RandomPredictor(1, 5) 
+    rec = Recommender(rp) 
+    rec.fit(uim) 
+    rec_items = rec.recommend(78, n=5, rec_seen=False) 
+    for idmovie, val in rec_items: 
+        print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
+
+
+class AveragePredictor:
+    def __init__(self, b=0):
+        self.b = max(0, b)
+
+    def fit(self, user_item_data):
+        self.data = user_item_data.data
+        movieIds = list(dict.fromkeys(self.data['movieID'].to_numpy()))
+        # sum of all rating for a movie { movieID: (vs, n) }
+        stats = {}
+        total_stats = [0, 0]
+        
+        for id in tqdm(movieIds):
+            ratings = self.data.loc[self.data['movieID'] == id]['rating']
+            stats[id] = [ratings.sum(), len(ratings)]
+            total_stats[0] = total_stats[0] + stats[id][0]
+            total_stats[1] = total_stats[1] + stats[id][1]
+
+        # init dict object
+        movie_dict = {}
+        # loop through movie ids
+        g_avg = total_stats[0] / total_stats[1]
+        for id in tqdm(movieIds):
+            # generate avrege weight for each movie id
+            movie_dict[id] = (stats[id][0] + self.b * g_avg) / (stats[id][1] + self.b)
+        self.movie_dict = movie_dict
+
+        
+
+    def predict(self, user_id):
+        # from DataFrame column of movie ids to array
+        return self.movie_dict
+
+
+
+def averagePredictor():
+    md = MovieData('data/movies.dat') 
+    uim = UserItemData('data/user_ratedmovies.dat') 
+    ap = AveragePredictor(0) 
+    rec = Recommender(ap) 
+    rec.fit(uim) 
+    rec_items = rec.recommend(78, n=5, rec_seen=False) 
+    for idmovie, val in rec_items: 
+        print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
+
+
+
+class ViewsPredictor:
+    def fit(self, user_item_data):
+        self.data = user_item_data.data
+        movieIds = list(dict.fromkeys(self.data['movieID'].to_numpy()))
+        # sum of all rating for a movie { movieID: (vs, n) }
+        self.movie_dict = {}
+        
+        for id in tqdm(movieIds):
+            ratings = self.data.loc[self.data['movieID'] == id]['rating']
+            self.movie_dict[id] = len(ratings)
+
+    def predict(self, user_id):
+        return self.movie_dict
+
+
+def viewsPredictor():
+    md = MovieData('data/movies.dat') 
+    uim = UserItemData('data/user_ratedmovies.dat') 
+    ap = ViewsPredictor() 
+    rec = Recommender(ap) 
+    rec.fit(uim) 
+    rec_items = rec.recommend(78, n=5, rec_seen=True) 
+    for idmovie, val in rec_items: 
+        print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
 
 if __name__ == "__main__":
-
     readRatings()
     readMovies()
+    randomPredictor()
+    recommendation()
+    averagePredictor()
+    viewsPredictor()

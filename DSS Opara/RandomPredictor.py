@@ -24,8 +24,8 @@ class RandomPredictor:
 
 
 if __name__ == "__main__":
-    md = MovieData('data/movies.dat')
-    uim = UserItemData('data/user_ratedmovies.dat')
+    md = MovieData('../data/movies.dat')
+    uim = UserItemData('../data/user_ratedmovies.dat')
     rp = RandomPredictor(1, 5)
     rp.fit(uim)
     pred = rp.predict(78)
