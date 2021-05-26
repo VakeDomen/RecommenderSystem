@@ -4,7 +4,12 @@ The data
 We will use the derived movielens data in these instructions. Unlike the original data set, this one contains much more than just estimates. The data description is in the README file. You can use any large enough data for your seminar.
 
 Reading ratings (+)
-Write a class (e.g. named UserItemData) in which you will store the read data. I suggest that you have a path argument and three optional arguments in the class constructor: from_date (from which date to read data), to_date (by which date to read data), and min_ratings (minimum number of ratings a movie should have). Add a method to the class that tells you how many ratings it has read. I suggest that you add a method that saves the read data or read the data using the pickle library. 
+Write a class (e.g. named UserItemData) in which you will store the read data. I suggest 
+that you have a path argument and three optional arguments in the class constructor: from_date 
+(from which date to read data), to_date (by which date to read data), and min_ratings (minimum 
+number of ratings a movie should have). Add a method to the class that tells you how many ratings 
+it has read. I suggest that you add a method that saves the read data or read the data using 
+the pickle library. 
 
 Example:
 
@@ -113,3 +118,73 @@ Movie: Jackass Number Two, score: 1.2189769976366684
 Movie: White Chicks, score: 1.1899581424297319
 
 """
+
+
+import pandas as pd
+from datetime import datetime
+
+class UserItemData:
+    def __init__(self, path, from_date="1.1.1900", to_date="31.12.2025", min_ratings=0):
+        # save data
+        self.path           = path
+        self.from_date      = from_date
+        self.to_date        = to_date
+        self.min_ratings    = min_ratings
+
+        # import dataset
+        from_data   = self.from_date.split('.')
+        to_data     = self.to_date.split('.')
+        self.data = pd.read_csv(self.path, sep="\t")
+        # rename cols so to_datetime can recognize them
+        self.data.columns = ['userID', 'movieID', 'rating', 'day', 'month', 'year', 'date_hour', 'date_minute', 'date_second']
+        # add column timestamp and format to datetime
+        self.data['timestamp'] = pd.to_datetime(self.data[['day', 'month', 'year']])
+        # filter out smaller by date
+        self.data = self.data[
+            self.data['timestamp'] >= datetime.strptime(self.from_date, '%d.%m.%Y')
+        ]
+        # filter out bigger by date
+        self.data = self.data[
+            self.data['timestamp'] <= datetime.strptime(self.to_date, '%d.%m.%Y')
+        ]
+
+        # filtr by minimum rating
+        self.data = self.data.groupby('movieID').filter(
+            lambda group: len(group) > self.min_ratings
+        )
+        
+
+
+
+    def nratings(self):
+        return len(self.data)
+
+class MovieData:
+    def __init__(self, path):
+        # save data
+        self.path = path
+        self.data = pd.read_csv(self.path, sep="\t")
+        
+    def get_title(self, id):
+        # filter by id
+        moviesById = self.data.query(f'id=={id}')
+        # extact title column (from array of site 1 / 0)
+        titles = moviesById['title']
+        # return first element (title)
+        return titles.iloc[0]
+
+def readRatings():
+    uim = UserItemData('data/user_ratedmovies.dat')
+    print(uim.nratings())
+    uim = UserItemData('data/user_ratedmovies.dat', from_date='12.1.2007', to_date='16.2.2008', min_ratings=100)
+    print(uim.nratings())
+
+def readMovies():
+    md = MovieData('data/movies.dat')
+    print(md.get_title(65091))
+
+
+if __name__ == "__main__":
+
+    readRatings()
+    readMovies()
