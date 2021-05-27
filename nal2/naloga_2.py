@@ -133,5 +133,24 @@ Recommender system with neural networks (*)
 In many domains, neural networks outperform traditional methods and it appears to be the case with the recommender systems as well. Implement the neural network following the instructions from the blog https://towardsdatascience.com/paper-review-neural-collaborative-filtering-explanation-implementation-ea3e031b7f96.
 """
 
-from nal1.Data import UserItemData, MovieData
-from nal1.Recommender import Recommender
+
+from imports.Data import UserItemData, MovieData
+from imports.Recommender import Recommender
+from Predictors import ItemBasedPredictor
+
+def itemBasedPredictor():
+    print("Runing item based predictor...")
+    md = MovieData('../data/movies.dat')
+    uim = UserItemData('../data/user_ratedmovies.dat', min_ratings=1000)
+    print(uim.data)
+    rp = ItemBasedPredictor()
+    rec = Recommender(rp)
+    rec.fit(uim)
+    print(uim.movies)
+    print("Similarity between the movies 'Men in black'(1580) and 'Ghostbusters'(2716): ", rp.similarity(1580, 2716))
+    print("Similarity between the movies 'Men in black'(1580) and 'Schindler's List'(527): ", rp.similarity(1580, 527))
+    print("Similarity between the movies 'Men in black'(1580) and 'Independence day'(780): ", rp.similarity(1580, 780))
+
+
+if __name__ == "__main__":
+    itemBasedPredictor()
