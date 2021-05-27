@@ -84,6 +84,25 @@ class ItemBasedPredictor:
         # return similarity
         return similarity
         
+    def similarItems(self, movie_id, n=5):
+        all_movie_ids = sorted(self.rating_table_with_nan.columns)
+        # dict to store the generated ratings or the user
+        movie_ratings = {}
+        # all similarities with other movies
+        similarities_of_the_movie = self.adj_mat[movie_id]
+        # save similatiris to movies in dict
+        for col in self.adj_mat:
+            movie_ratings[col] = similarities_of_the_movie[col]
+        # sort movies by similarities
+        movie_ratings = dict(sorted(movie_ratings.items(), key=lambda item: item[1], reverse=True))
+        # setup output list
+        output = []
+        for key in movie_ratings:
+            # if output is full, stop finding good movies
+            if len(output) == n:
+                break
+            output.append((key, movie_ratings[key]))
+        return output
         
 
 

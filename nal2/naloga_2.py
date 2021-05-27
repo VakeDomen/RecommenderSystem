@@ -168,6 +168,18 @@ def movieSimilarityPrediction():
         # print(val)
         print("Movie1: {}, Movie2: {}, similarity: {}".format(md.get_title(idmovie), md.get_title(val[0]), val[1]))
 
+def mostSimilarToMovie():
+    md = MovieData('../data/movies.dat')
+    uim = UserItemData('../data/user_ratedmovies.dat', min_ratings=1000)
+    rp = ItemBasedPredictor()
+    rec = Recommender(rp)
+    rec.fit(uim)
+    rec_items = rp.similarItems(4993, 10)
+    print('Movies similar to "The Lord of the Rings: The Fellowship of the Ring": ')
+    for idmovie, val in rec_items:
+        print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
+
 if __name__ == "__main__":
     # itemBasedPredictor()
-    movieSimilarityPrediction()
+    # movieSimilarityPrediction()
+    mostSimilarToMovie()
