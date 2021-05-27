@@ -142,14 +142,18 @@ def itemBasedPredictor():
     print("Runing item based predictor...")
     md = MovieData('../data/movies.dat')
     uim = UserItemData('../data/user_ratedmovies.dat', min_ratings=1000)
-    print(uim.data)
     rp = ItemBasedPredictor()
     rec = Recommender(rp)
     rec.fit(uim)
-    print(uim.movies)
+    # print(uim.movies)
     print("Similarity between the movies 'Men in black'(1580) and 'Ghostbusters'(2716): ", rp.similarity(1580, 2716))
     print("Similarity between the movies 'Men in black'(1580) and 'Schindler's List'(527): ", rp.similarity(1580, 527))
     print("Similarity between the movies 'Men in black'(1580) and 'Independence day'(780): ", rp.similarity(1580, 780))
+
+    print("Predictions for 78: ")
+    rec_items = rec.recommend(78, n=15, rec_seen=False)
+    for idmovie, val in rec_items:
+        print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
 
 
 if __name__ == "__main__":
