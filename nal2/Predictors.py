@@ -252,25 +252,11 @@ class SlopeOnePredictor:
             # updte movies, that still need to be rated
             movies_to_rate = list(set(all_movie_ids) - set(user_rated_movies))
             # if all movies are rated stop rating
-            # break
-            
             if len(movies_to_rate) == 0:
                 break
-        
-        
         movie_ratings = {}
         dick = dict(self.rating_table.loc[user_id])
         movie_ratings = dict(sorted(dick.items(), key=lambda item: item[1], reverse=True))
-
-        
-        # dict to store the generated ratings or the user (will be returened at the end)
-        # for index, id in enumerate(all_movie_ids):
-        #     similarities_of_the_movie = self.adj_mat[id]
-        #     similarities_to_user_rated_movies = similarities_of_the_movie[user_rated_movies]
-        #     max_similarity = similarities_to_user_rated_movies.max()
-        #     index_max_similarity = similarities_to_user_rated_movies.idxmax()
-        #     movie_ratings[id] = max_similarity * user_ratings[index_max_similarity]
-
         return movie_ratings
 
     def similarity(self, user1_id, user2_id, all_user_ids):
