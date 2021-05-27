@@ -135,8 +135,8 @@ In many domains, neural networks outperform traditional methods and it appears t
 
 
 from imports.Data import UserItemData, MovieData
-from imports.Recommender import Recommender
-from Predictors import ItemBasedPredictor
+from imports.Recommender import Recommender, RecommenderTopSimilar
+from Predictors import ItemBasedPredictor, MovieSimilarityBasedPredictor
 
 def itemBasedPredictor():
     print("Runing item based predictor...")
@@ -155,6 +155,19 @@ def itemBasedPredictor():
     for idmovie, val in rec_items:
         print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
 
+def movieSimilarityPrediction():
+    print("Runing item based predictor...")
+    md = MovieData('../data/movies.dat')
+    uim = UserItemData('../data/user_ratedmovies.dat', min_ratings=1000)
+    rp = MovieSimilarityBasedPredictor()
+    rec = RecommenderTopSimilar(rp)
+    rec.fit(uim)
+    rec_items = rec.recommend(78, n=20, rec_seen=False)
+    # print(rec_items)
+    for idmovie, val in rec_items:
+        # print(val)
+        print("Movie1: {}, Movie2: {}, similarity: {}".format(md.get_title(idmovie), md.get_title(val[0]), val[1]))
 
 if __name__ == "__main__":
-    itemBasedPredictor()
+    # itemBasedPredictor()
+    movieSimilarityPrediction()
