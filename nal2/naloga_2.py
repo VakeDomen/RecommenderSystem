@@ -133,3 +133,5 @@ Recommender system with neural networks (*)
 In many domains, neural networks outperform traditional methods and it appears to be the case with the recommender systems as well. Implement the neural network following the instructions from the blog https://towardsdatascience.com/paper-review-neural-collaborative-filtering-explanation-implementation-ea3e031b7f96.
 """
 
+from nal1.Data import UserItemData, MovieData
+from nal1.Recommender import Recommender
