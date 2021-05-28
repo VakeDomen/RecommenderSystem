@@ -50,6 +50,9 @@ class Recommender:
 
         X = list(prediction_values.values())
         Y = list(test_set_values.values())
+        print("PREDICTIONS: ", X)
+        print("OUR VALUES:  ", Y)
+
 
         mae, rmse, recall, accuraccy, f1 = 0, 0, 0, 0, 0
         TP, FP, TN, FN = 0, 0, 0,0

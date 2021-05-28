@@ -1,17 +1,14 @@
-
-
-
 from Data import UserItemData, MovieData
 from imports.Recommender import Recommender
 from imports.Predictors import AveragePredictor, RandomPredictor, SlopeOnePredictor, ItemBasedPredictor, ViewsPredictor
 
 
 if __name__ == "__main__":
-    print("Runing evaluator...")
+    print("Running evaluator...")
     md = MovieData('../data/movies.dat')
     uid = UserItemData('../data/user_ratedmovies.dat', min_ratings=1000)
     test_set = uid.getTestSetData(2053)
-    rp = SlopeOnePredictor(1, 5)
+    rp = ItemBasedPredictor()
     rec = Recommender(rp)
     rec.fit(uid)
     

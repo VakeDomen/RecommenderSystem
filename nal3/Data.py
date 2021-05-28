@@ -40,8 +40,6 @@ class UserItemData:
         # all user ratings
         # print(self.data.groupby('userID').agg(count=('rating', 'count')).idxmax())
         
-
-
         user_data = self.data.loc[self.data['userID'] == user_id]
         # size of the test set
         test_set_size = math.floor(len(user_data) * test_size_percentage)
