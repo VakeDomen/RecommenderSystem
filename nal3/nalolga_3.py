@@ -8,7 +8,7 @@ if __name__ == "__main__":
     md = MovieData('../data/movies.dat')
     uid = UserItemData('../data/user_ratedmovies.dat', min_ratings=1000)
     test_set = uid.getTestSetData(2053)
-    rp = ItemBasedPredictor()
+    rp = SlopeOnePredictor()
     rec = Recommender(rp)
     rec.fit(uid)
     
