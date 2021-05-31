@@ -39,7 +39,7 @@ def mostSimilarToMovie():
     rp = ItemBasedPredictor()
     rec = Recommender(rp)
     rec.fit(uim)
-    rec_items = rp.similarItems(4993, 10)
+    rec_items = rp.similarItems(4993, 5)
     print('Movies similar to "The Lord of the Rings: The Fellowship of the Ring": ')
     for idmovie, val in rec_items:
         print("Movie: {}, score: {}".format(md.get_title(idmovie), val))
@@ -51,10 +51,6 @@ def listMoviesforMe():
     rp = ItemBasedPredictor()
     rec = Recommender(rp)
     rec.fit(uim)
-    # print(uim.movies)
-    print("Similarity between the movies 'Men in black'(1580) and 'Ghostbusters'(2716): ", rp.similarity(1580, 2716))
-    print("Similarity between the movies 'Men in black'(1580) and 'Schindler's List'(527): ", rp.similarity(1580, 527))
-    print("Similarity between the movies 'Men in black'(1580) and 'Independence day'(780): ", rp.similarity(1580, 780))
 
     print("Predictions for myself (user 666): ")
     rec_items = rec.recommend(666, n=10, rec_seen=False)

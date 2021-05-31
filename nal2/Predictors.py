@@ -17,7 +17,7 @@ class ItemBasedPredictor:
     def fit(self, user_data):
         # save data of ratings
         self.data = user_data.data
-        # save the pivot table (userID:movieID => value in tabe is the rating of 
+        # save the pivot table (userID:movieID => value in tabel is the rating of 
         # the movie by the user | or NaN is no rating has been given)
         self.rating_table = pd.pivot_table(self.data, values="rating", index=["userID"], columns=['movieID'])
         self.rating_table_with_nan = pd.pivot_table(self.data, values="rating", index=["userID"], columns=['movieID'])
@@ -32,7 +32,7 @@ class ItemBasedPredictor:
             avg_rating = user[~np.isnan(user)].mean()
             # replace NaN values with the avg rating
             self.rating_table.iloc[index] = self.rating_table.iloc[index].fillna(avg_rating)
-            # substract acg from all ratings (NaN and avg is now at 0) and 
+            # substract avg from all ratings (NaN and avg is now at 0) and 
             self.rating_table.iloc[index] = self.rating_table.iloc[index] - avg_rating
         # dataframe where both axis are movieID. The value of the field is currently 
         # NaN but will be the similiarity between movies (by user ratings)
@@ -218,7 +218,7 @@ class SlopeOnePredictor:
         for i in range(len(columns)):
             if math.isnan(r[i]) and not math.isnan(ur[i]):
                 r[i] = ur[i] + sum
-                print('Predicted ' + str(i) + ' -> ' + str(r[i]))
+                # print('Predicted ' + str(i) + ' -> ' + str(r[i]))
                 ratings.at[id, i] = r[i]
                 self.rating_table.at[id, i] = r[i]
 
@@ -244,12 +244,12 @@ class SlopeOnePredictor:
         # movie ids that need to be rated
         movies_to_rate = list(set(all_movie_ids) - set(user_rated_movies))
         # in order fill the unrated movies untill all are filled
-        for u_id, val in similarities.items():
+        for u_id, val in tqdm(similarities.items()):
             if u_id == user_id:
                 continue
             # update user ratings with completed predictions
             self.slopeOne(user_id, u_id)
-            # updte movies, that still need to be rated
+            # update movies, that still need to be rated
             movies_to_rate = list(set(all_movie_ids) - set(user_rated_movies))
             # if all movies are rated stop rating
             if len(movies_to_rate) == 0:
